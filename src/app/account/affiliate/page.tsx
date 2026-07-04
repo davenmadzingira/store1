@@ -7,13 +7,13 @@ export default async function AffiliateDashboardPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-const { data: profileData } = await supabase
-  .from('profiles')
+const { data: conversionsData } = await supabase
+  .from('affiliate_conversions')
   .select('*')
-  .eq('id', user!.id)
-  .single()
+  .eq('affiliate_code', profile?.affiliate_code || '')
+  .order('created_at', { ascending: false })
 
-const profile = profileData as Profile | null
+const conversions = conversionsData as any
 
   const { count: clickCount } = await supabase
     .from('affiliate_clicks')
