@@ -7,20 +7,26 @@ export default async function AffiliateDashboardPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-const conversionsData = await supabase
+const { data: profileData } = await supabase
+  .from('profiles')
+  .select('*')
+  .eq('id', user!.id)
+  .single()
+
+const profile = (profileData as unknown) as Profile
+
+const { count: clickCount } = await supabase
+  .from('affiliate_clicks')
+  .select('id', { count: 'exact', head: true })
+  .eq('referred_by_code', profile?.affiliate_code || '')
+
+const { data: conversionsData } = await supabase
   .from('affiliate_conversions')
   .select('*')
   .eq('affiliate_code', profile?.affiliate_code || '')
   .order('created_at', { ascending: false })
 
 const conversions = conversionsData as any
-
- const { data: conversions } = await supabase
-  .from('affiliate_conversions')
-  .select('*')
-  .eq('affiliate_code', profile?.affiliate_code || '')
-  .order('created_at', { ascending: false })
-  .returns<AffiliateConversion[]>()
 
   const totalCommissionCents = (conversions || []).reduce((sum, c) => sum + c.commission_cents, 0)
   const paidCommissionCents = (conversions || [])
