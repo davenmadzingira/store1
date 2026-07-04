@@ -1,3 +1,4 @@
+import type { Profile, AffiliateConversion } from '@/types/database'
 import type { Profile } from '@/types/database'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice, formatDate } from '@/lib/utils'
@@ -18,11 +19,12 @@ const { data: profile } = await supabase
     .select('id', { count: 'exact', head: true })
    .eq('referred_by_code', profile?.affiliate_code || '')
 
-  const { data: conversions } = await supabase
-    .from('affiliate_conversions')
-    .select('*')
-    .eq('referred_by_code', profile?.affiliate_code || '')
-    .order('created_at', { ascending: false })
+ const { data: conversions } = await supabase
+  .from('affiliate_conversions')
+  .select('*')
+  .eq('affiliate_code', profile?.affiliate_code || '')
+  .order('created_at', { ascending: false })
+  .returns<AffiliateConversion[]>()
 
   const totalCommissionCents = (conversions || []).reduce((sum, c) => sum + c.commission_cents, 0)
   const paidCommissionCents = (conversions || [])
