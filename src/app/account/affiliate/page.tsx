@@ -62,7 +62,7 @@ const paidCommissionCents = (conversions || [])
         <p className="shelf-label mb-3">Conversion history</p>
         {conversions && conversions.length > 0 ? (
           <div className="divide-y divide-ink-100 text-sm">
-            {conversions.map((c) => (
+            {conversions.map((c: any) => (
               <div key={c.id} className="flex items-center justify-between py-3">
                 <div>
                   <p className="text-ink-900">{formatDate(c.created_at)}</p>
