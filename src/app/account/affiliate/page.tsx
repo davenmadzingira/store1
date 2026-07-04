@@ -13,7 +13,7 @@ const { data: profileData } = await supabase
   .eq('id', user!.id)
   .single()
 
-const profile = profileData as Profile
+const profile = profileData as Profile | null
 
   const { count: clickCount } = await supabase
     .from('affiliate_clicks')
