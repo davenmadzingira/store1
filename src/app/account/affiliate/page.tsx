@@ -10,7 +10,7 @@ export default async function AffiliateDashboardPage() {
 const { data: profile } = await supabase
   .from('profiles')
   .select('*')
-  .eq('id', user.id)
+  .eq('id', user!.id)
   .single<Profile>()
 
   const { count: clickCount } = await supabase
