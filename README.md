@@ -227,3 +227,4 @@ supabase/
 "# digital-store" 
 "# store1" 
 "# mystore" 
+"# store2" 
