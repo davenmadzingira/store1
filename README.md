@@ -225,3 +225,4 @@ supabase/
 - Download limit per purchase defaults to 5 — change `download_limit` in
   `src/lib/fulfill-order.ts`.
 "# digital-store" 
+"# store1" 
