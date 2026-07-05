@@ -226,3 +226,4 @@ supabase/
   `src/lib/fulfill-order.ts`.
 "# digital-store" 
 "# store1" 
+"# mystore" 
