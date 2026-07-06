@@ -21,17 +21,23 @@ export default function AccountSettingsPage() {
     })
   }, [])
 
-    async function handleProfileSave(e: React.FormEvent) {
+  async function handleProfileSave(e: React.FormEvent) {
     e.preventDefault()
     setSavingProfile(true)
-  const supabase = createClient()
-const { data: { user } } = await supabase.auth.getUser()
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-await supabase.auth.updateUser({ data: { full_name: fullName } })
-setMessage('Profile updated')
-setSavingProfile(false)
+    if (user) {
+      await supabase
+        .from('profiles')
+        .update({ full_name: fullName } as { full_name: string })
+        .eq('id', user.id)
+    }
 
-      }
+    await supabase.auth.updateUser({ data: { full_name: fullName } })
+    setMessage('Profile updated')
+    setSavingProfile(false)
+  }
 
   async function handlePasswordChange(e: React.FormEvent) {
     e.preventDefault()

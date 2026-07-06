@@ -2,19 +2,21 @@ import { createClient } from '@/lib/supabase/server'
 import { AffiliateConversionsTable } from '@/components/admin/affiliate-conversions-table'
 import { LogConversionForm } from '@/components/admin/log-conversion-form'
 import { formatPrice } from '@/lib/utils'
-import type { Product } from '@/types/database'
+import type { Product, AffiliateConversion } from '@/types/database'
 
 export default async function AdminAffiliatesPage() {
   const supabase = createClient()
 
-  const [{ data: conversions }, { count: totalClicks }, { data: affiliateProducts }] = await Promise.all([
+  const [{ data: conversionsRaw }, { count: totalClicks }, { data: affiliateProducts }] = await Promise.all([
     supabase.from('affiliate_conversions').select('*').order('created_at', { ascending: false }),
     supabase.from('affiliate_clicks').select('id', { count: 'exact', head: true }),
     supabase.from('products').select('*').eq('type', 'affiliate').eq('status', 'published'),
   ])
 
-  const totalCommissionCents = (conversions || []).reduce((sum, c) => sum + c.commission_cents, 0)
-  const pendingCommissionCents = (conversions || [])
+  const conversions = (conversionsRaw || []) as AffiliateConversion[]
+
+  const totalCommissionCents = conversions.reduce((sum, c) => sum + c.commission_cents, 0)
+  const pendingCommissionCents = conversions
     .filter((c) => c.status === 'pending' || c.status === 'approved')
     .reduce((sum, c) => sum + c.commission_cents, 0)
 
@@ -35,7 +37,7 @@ export default async function AdminAffiliatesPage() {
 
       <div className="mt-8">
         <p className="shelf-label mb-3">Conversion history</p>
-        <AffiliateConversionsTable conversions={conversions || []} />
+        <AffiliateConversionsTable conversions={conversions} />
         {(!conversions || conversions.length === 0) && (
           <p className="mt-6 text-sm text-ink-400">No conversions logged yet.</p>
         )}
