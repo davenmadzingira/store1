@@ -1,10 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
+import type { BlogPost } from '@/types/database'
 import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
 
 export default async function AdminBlogPage() {
   const supabase = createClient()
-  const { data: posts } = await supabase.from('blog_posts').select('*').order('created_at', { ascending: false })
+  const { data: postsRaw } = await supabase.from('blog_posts').select('*').order('created_at', { ascending: false })
+  const posts = (postsRaw || []) as BlogPost[]
 
   return (
     <div>
@@ -25,7 +27,7 @@ export default async function AdminBlogPage() {
           </tr>
         </thead>
         <tbody className="divide-y divide-ink-100">
-          {posts?.map((post) => (
+          {posts.map((post) => (
             <tr key={post.id}>
               <td className="py-3 font-medium text-ink-900">{post.title}</td>
               <td className="py-3">
@@ -42,7 +44,7 @@ export default async function AdminBlogPage() {
         </tbody>
       </table>
 
-      {(!posts || posts.length === 0) && <p className="mt-10 text-sm text-ink-400">No posts yet.</p>}
+      {posts.length === 0 && <p className="mt-10 text-sm text-ink-400">No posts yet.</p>}
     </div>
   )
 }
