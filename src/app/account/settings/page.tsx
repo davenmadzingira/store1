@@ -25,15 +25,6 @@ export default function AccountSettingsPage() {
     e.preventDefault()
     setSavingProfile(true)
     const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (user) {
-      await supabase
-        .from('profiles')
-        .update({ full_name: fullName } as { full_name: string })
-        .eq('id', user.id)
-    }
-
     await supabase.auth.updateUser({ data: { full_name: fullName } })
     setMessage('Profile updated')
     setSavingProfile(false)
