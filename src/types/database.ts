@@ -1,619 +1,180 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type ProductType = 'digital' | 'affiliate'
+export type ProductStatus = 'draft' | 'published' | 'archived'
+export type OrderStatus = 'pending' | 'paid' | 'failed' | 'refunded'
+export type PaymentProvider = 'stripe' | 'paypal'
+export type DiscountType = 'percent' | 'fixed'
+export type ConversionStatus = 'pending' | 'approved' | 'paid' | 'rejected'
+export type BlogStatus = 'draft' | 'published'
 
-export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
+export interface Profile {
+  id: string
+  email: string
+  full_name: string | null
+  is_admin: boolean
+  affiliate_code: string | null
+  created_at: string
+}
+
+export interface Category {
+  id: string
+  name: string
+  slug: string
+  created_at: string
+}
+
+export interface Product {
+  id: string
+  title: string
+  slug: string
+  description: string
+  short_description: string
+  price_cents: number
+  compare_at_cents: number | null
+  currency: string
+  type: ProductType
+  category_id: string | null
+  category?: Category | null
+  cover_image_url: string | null
+  gallery_urls: string[]
+  file_path: string | null
+  file_size_bytes: number | null
+  affiliate_url: string | null
+  affiliate_commission_pct: number | null
+  status: ProductStatus
+  seo_title: string | null
+  seo_description: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Coupon {
+  id: string
+  code: string
+  description: string | null
+  discount_type: DiscountType
+  discount_value: number
+  max_redemptions: number | null
+  times_redeemed: number
+  min_order_cents: number
+  starts_at: string
+  expires_at: string | null
+  is_active: boolean
+  created_at: string
+}
+
+export interface Order {
+  id: string
+  user_id: string | null
+  email: string
+  status: OrderStatus
+  subtotal_cents: number
+  discount_cents: number
+  total_cents: number
+  currency: string
+  coupon_id: string | null
+  payment_provider: PaymentProvider | null
+  payment_intent_id: string | null
+  affiliate_ref: string | null
+  created_at: string
+  paid_at: string | null
+  items?: OrderItem[]
+}
+
+export interface OrderItem {
+  id: string
+  order_id: string
+  product_id: string
+  title_snapshot: string
+  price_cents_snapshot: number
+  quantity: number
+  download_token: string | null
+  download_count: number
+  download_limit: number
+  created_at: string
+  product?: Product
+}
+
+export interface AffiliateClick {
+  id: string
+  product_id: string
+  referred_by_code: string | null
+  ip_hash: string | null
+  user_agent: string | null
+  created_at: string
+}
+
+export interface AffiliateConversion {
+  id: string
+  click_id: string | null
+  product_id: string
+  affiliate_code: string
+  order_value_cents: number
+  commission_cents: number
+  status: ConversionStatus
+  created_at: string
+}
+
+export interface BlogPost {
+  id: string
+  title: string
+  slug: string
+  excerpt: string | null
+  content_md: string
+  cover_image_url: string | null
+  author_id: string | null
+  status: BlogStatus
+  seo_title: string | null
+  seo_description: string | null
+  published_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ContactMessage {
+  id: string
+  name: string
+  email: string
+  subject: string | null
+  message: string
+  is_read: boolean
+  created_at: string
+}
+
+export interface PendingPaypalOrder {
+  id: string
+  paypal_order_id: string
+  lines: { productId: string; quantity: number }[]
+  coupon_code: string | null
+  email: string
+  user_id: string | null
+  affiliate_ref: string | null
+  created_at: string
+}
+
+// ----- Cart (client-side only, not persisted to DB until checkout) -----
+export interface CartItem {
+  productId: string
+  slug: string
+  title: string
+  priceCents: number
+  imageUrl: string | null
+  quantity: number
+}
+
+export interface Database {
   public: {
     Tables: {
-      affiliate_clicks: {
-        Row: {
-          created_at: string
-          id: string
-          ip_hash: string | null
-          product_id: string
-          referred_by_code: string | null
-          user_agent: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          ip_hash?: string | null
-          product_id: string
-          referred_by_code?: string | null
-          user_agent?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          ip_hash?: string | null
-          product_id?: string
-          referred_by_code?: string | null
-          user_agent?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "affiliate_clicks_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      affiliate_conversions: {
-        Row: {
-          affiliate_code: string
-          click_id: string | null
-          commission_cents: number
-          created_at: string
-          id: string
-          order_value_cents: number
-          product_id: string
-          status: string
-        }
-        Insert: {
-          affiliate_code: string
-          click_id?: string | null
-          commission_cents?: number
-          created_at?: string
-          id?: string
-          order_value_cents?: number
-          product_id: string
-          status?: string
-        }
-        Update: {
-          affiliate_code?: string
-          click_id?: string | null
-          commission_cents?: number
-          created_at?: string
-          id?: string
-          order_value_cents?: number
-          product_id?: string
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "affiliate_conversions_click_id_fkey"
-            columns: ["click_id"]
-            isOneToOne: false
-            referencedRelation: "affiliate_clicks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "affiliate_conversions_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      blog_posts: {
-        Row: {
-          author_id: string | null
-          content_md: string
-          cover_image_url: string | null
-          created_at: string
-          excerpt: string | null
-          id: string
-          published_at: string | null
-          seo_description: string | null
-          seo_title: string | null
-          slug: string
-          status: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          author_id?: string | null
-          content_md?: string
-          cover_image_url?: string | null
-          created_at?: string
-          excerpt?: string | null
-          id?: string
-          published_at?: string | null
-          seo_description?: string | null
-          seo_title?: string | null
-          slug: string
-          status?: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          author_id?: string | null
-          content_md?: string
-          cover_image_url?: string | null
-          created_at?: string
-          excerpt?: string | null
-          id?: string
-          published_at?: string | null
-          seo_description?: string | null
-          seo_title?: string | null
-          slug?: string
-          status?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "blog_posts_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      categories: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          slug: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          slug: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          slug?: string
-        }
-        Relationships: []
-      }
-      contact_messages: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          is_read: boolean
-          message: string
-          name: string
-          subject: string | null
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          is_read?: boolean
-          message: string
-          name: string
-          subject?: string | null
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          is_read?: boolean
-          message?: string
-          name?: string
-          subject?: string | null
-        }
-        Relationships: []
-      }
-      coupons: {
-        Row: {
-          code: string
-          created_at: string
-          description: string | null
-          discount_type: string
-          discount_value: number
-          expires_at: string | null
-          id: string
-          is_active: boolean
-          max_redemptions: number | null
-          min_order_cents: number
-          starts_at: string
-          times_redeemed: number
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          description?: string | null
-          discount_type: string
-          discount_value: number
-          expires_at?: string | null
-          id?: string
-          is_active?: boolean
-          max_redemptions?: number | null
-          min_order_cents?: number
-          starts_at?: string
-          times_redeemed?: number
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          description?: string | null
-          discount_type?: string
-          discount_value?: number
-          expires_at?: string | null
-          id?: string
-          is_active?: boolean
-          max_redemptions?: number | null
-          min_order_cents?: number
-          starts_at?: string
-          times_redeemed?: number
-        }
-        Relationships: []
-      }
-      order_items: {
-        Row: {
-          created_at: string
-          download_count: number
-          download_limit: number
-          download_token: string | null
-          id: string
-          order_id: string
-          price_cents_snapshot: number
-          product_id: string
-          quantity: number
-          title_snapshot: string
-        }
-        Insert: {
-          created_at?: string
-          download_count?: number
-          download_limit?: number
-          download_token?: string | null
-          id?: string
-          order_id: string
-          price_cents_snapshot: number
-          product_id: string
-          quantity?: number
-          title_snapshot: string
-        }
-        Update: {
-          created_at?: string
-          download_count?: number
-          download_limit?: number
-          download_token?: string | null
-          id?: string
-          order_id?: string
-          price_cents_snapshot?: number
-          product_id?: string
-          quantity?: number
-          title_snapshot?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "order_items_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_items_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      orders: {
-        Row: {
-          affiliate_ref: string | null
-          coupon_id: string | null
-          created_at: string
-          currency: string
-          discount_cents: number
-          email: string
-          id: string
-          paid_at: string | null
-          payment_intent_id: string | null
-          payment_provider: string | null
-          status: string
-          subtotal_cents: number
-          total_cents: number
-          user_id: string | null
-        }
-        Insert: {
-          affiliate_ref?: string | null
-          coupon_id?: string | null
-          created_at?: string
-          currency?: string
-          discount_cents?: number
-          email: string
-          id?: string
-          paid_at?: string | null
-          payment_intent_id?: string | null
-          payment_provider?: string | null
-          status?: string
-          subtotal_cents: number
-          total_cents: number
-          user_id?: string | null
-        }
-        Update: {
-          affiliate_ref?: string | null
-          coupon_id?: string | null
-          created_at?: string
-          currency?: string
-          discount_cents?: number
-          email?: string
-          id?: string
-          paid_at?: string | null
-          payment_intent_id?: string | null
-          payment_provider?: string | null
-          status?: string
-          subtotal_cents?: number
-          total_cents?: number
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "orders_coupon_id_fkey"
-            columns: ["coupon_id"]
-            isOneToOne: false
-            referencedRelation: "coupons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "orders_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      products: {
-        Row: {
-          affiliate_commission_pct: number | null
-          affiliate_url: string | null
-          category_id: string | null
-          compare_at_cents: number | null
-          cover_image_url: string | null
-          created_at: string
-          currency: string
-          description: string
-          file_path: string | null
-          file_size_bytes: number | null
-          gallery_urls: string[]
-          id: string
-          price_cents: number
-          search_vector: unknown
-          seo_description: string | null
-          seo_title: string | null
-          short_description: string
-          slug: string
-          status: string
-          title: string
-          type: string
-          updated_at: string
-        }
-        Insert: {
-          affiliate_commission_pct?: number | null
-          affiliate_url?: string | null
-          category_id?: string | null
-          compare_at_cents?: number | null
-          cover_image_url?: string | null
-          created_at?: string
-          currency?: string
-          description?: string
-          file_path?: string | null
-          file_size_bytes?: number | null
-          gallery_urls?: string[]
-          id?: string
-          price_cents?: number
-          search_vector?: unknown
-          seo_description?: string | null
-          seo_title?: string | null
-          short_description?: string
-          slug: string
-          status?: string
-          title: string
-          type: string
-          updated_at?: string
-        }
-        Update: {
-          affiliate_commission_pct?: number | null
-          affiliate_url?: string | null
-          category_id?: string | null
-          compare_at_cents?: number | null
-          cover_image_url?: string | null
-          created_at?: string
-          currency?: string
-          description?: string
-          file_path?: string | null
-          file_size_bytes?: number | null
-          gallery_urls?: string[]
-          id?: string
-          price_cents?: number
-          search_vector?: unknown
-          seo_description?: string | null
-          seo_title?: string | null
-          short_description?: string
-          slug?: string
-          status?: string
-          title?: string
-          type?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "products_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      profiles: {
-        Row: {
-          affiliate_code: string | null
-          created_at: string
-          email: string
-          full_name: string | null
-          id: string
-          is_admin: boolean
-        }
-        Insert: {
-          affiliate_code?: string | null
-          created_at?: string
-          email: string
-          full_name?: string | null
-          id: string
-          is_admin?: boolean
-        }
-        Update: {
-          affiliate_code?: string | null
-          created_at?: string
-          email?: string
-          full_name?: string | null
-          id?: string
-          is_admin?: boolean
-        }
-        Relationships: []
-      }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
+      profiles: { Row: Profile; Insert: Partial<Profile>; Update: Partial<Profile> }
+      categories: { Row: Category; Insert: Partial<Category>; Update: Partial<Category> }
+      products: { Row: Product; Insert: Partial<Product>; Update: Partial<Product> }
+      coupons: { Row: Coupon; Insert: Partial<Coupon>; Update: Partial<Coupon> }
+      orders: { Row: Order; Insert: Partial<Order>; Update: Partial<Order> }
+      order_items: { Row: OrderItem; Insert: Partial<OrderItem>; Update: Partial<OrderItem> }
+      affiliate_clicks: { Row: AffiliateClick; Insert: Partial<AffiliateClick>; Update: Partial<AffiliateClick> }
+      affiliate_conversions: { Row: AffiliateConversion; Insert: Partial<AffiliateConversion>; Update: Partial<AffiliateConversion> }
+      blog_posts: { Row: BlogPost; Insert: Partial<BlogPost>; Update: Partial<BlogPost> }
+      contact_messages: { Row: ContactMessage; Insert: Partial<ContactMessage>; Update: Partial<ContactMessage> }
+      pending_paypal_orders: { Row: PendingPaypalOrder; Insert: Partial<PendingPaypalOrder>; Update: Partial<PendingPaypalOrder> }
     }
   }
 }
-
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
-
-export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
-
-export const Constants = {
-  public: {
-    Enums: {},
-  },
-} as const
