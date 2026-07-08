@@ -228,3 +228,4 @@ supabase/
 "# store1" 
 "# mystore" 
 "# store2" 
+"# store3" 
