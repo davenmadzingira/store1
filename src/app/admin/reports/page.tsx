@@ -1,13 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice } from '@/lib/utils'
 import { SalesChart } from '@/components/admin/sales-chart'
+import type { Order } from '@/types/database'
 
 export default async function SalesReportsPage() {
   const supabase = createClient()
 
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
 
-  const { data: orders } = await supabase
+  const { data: ordersRaw } = await supabase
     .from('orders')
     .select('total_cents, created_at, status')
     .eq('status', 'paid')
@@ -19,9 +20,10 @@ export default async function SalesReportsPage() {
     .select('title_snapshot, price_cents_snapshot, quantity, order:orders(status, created_at)')
     .gte('created_at', ninetyDaysAgo)
 
-  // Bucket revenue by day for the chart
+  const orders = (ordersRaw || []) as Pick<Order, 'total_cents' | 'created_at' | 'status'>[]
+
   const byDay = new Map<string, { revenue: number; orders: number }>()
-  for (const order of orders || []) {
+  for (const order of orders) {
     const day = new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     const bucket = byDay.get(day) || { revenue: 0, orders: 0 }
     bucket.revenue += order.total_cents / 100
@@ -30,7 +32,6 @@ export default async function SalesReportsPage() {
   }
   const chartData = Array.from(byDay.entries()).map(([date, v]) => ({ date, ...v }))
 
-  // Aggregate by product title for "top products"
   const byProduct = new Map<string, { revenue: number; units: number }>()
   for (const item of (topItems as any[]) || []) {
     if (item.order?.status !== 'paid') continue
@@ -44,8 +45,8 @@ export default async function SalesReportsPage() {
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 8)
 
-  const totalRevenue = (orders || []).reduce((sum, o) => sum + o.total_cents, 0)
-  const totalOrders = (orders || []).length
+  const totalRevenue = orders.reduce((sum, o) => sum + o.total_cents, 0)
+  const totalOrders = orders.length
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
 
   return (
