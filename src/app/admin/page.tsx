@@ -1,19 +1,22 @@
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice } from '@/lib/utils'
 import Link from 'next/link'
+import type { Order } from '@/types/database'
 
 export default async function AdminOverviewPage() {
   const supabase = createClient()
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
-  const [{ data: recentOrders }, { count: productCount }, { count: unreadMessages }] = await Promise.all([
+  const [{ data: recentOrdersRaw }, { count: productCount }, { count: unreadMessages }] = await Promise.all([
     supabase.from('orders').select('total_cents, status, created_at').gte('created_at', thirtyDaysAgo),
     supabase.from('products').select('id', { count: 'exact', head: true }).eq('status', 'published'),
     supabase.from('contact_messages').select('id', { count: 'exact', head: true }).eq('is_read', false),
   ])
 
-  const paidOrders = (recentOrders || []).filter((o) => o.status === 'paid')
+  const recentOrders = (recentOrdersRaw || []) as Pick<Order, 'total_cents' | 'status' | 'created_at'>[]
+
+  const paidOrders = recentOrders.filter((o) => o.status === 'paid')
   const revenue30d = paidOrders.reduce((sum, o) => sum + o.total_cents, 0)
 
   return (
