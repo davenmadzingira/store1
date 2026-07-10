@@ -3,6 +3,7 @@ import { capturePaypalOrder } from '@/lib/paypal/server'
 import { priceCheckout } from '@/lib/checkout-pricing'
 import { fulfillOrder } from '@/lib/fulfill-order'
 import { createAdminClient } from '@/lib/supabase/admin'
+import type { PendingPaypalOrder } from '@/types/database'
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,15 +14,17 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = createAdminClient()
-    const { data: pending } = await supabase
+    const { data: pendingRaw } = await supabase
       .from('pending_paypal_orders')
       .select('*')
       .eq('paypal_order_id', orderId)
       .single()
 
-    if (!pending) {
+    if (!pendingRaw) {
       return NextResponse.json({ success: false, error: 'Order not found or already processed' }, { status: 404 })
     }
+
+    const pending = pendingRaw as PendingPaypalOrder
 
     const capture = await capturePaypalOrder(orderId)
 
