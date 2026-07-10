@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = createAdminClient()
-  const { error } = await supabase.from('contact_messages').insert({ name, email, subject, message })
+  const { error } = await supabase.from('contact_messages').insert({ name, email, subject, message } as any)
 
   if (error) {
     console.error('Contact message insert failed:', error)
