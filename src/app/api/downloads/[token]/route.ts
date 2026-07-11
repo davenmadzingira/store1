@@ -9,17 +9,15 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   const { token } = params
   const supabase = createAdminClient()
 
-  const { data: orderItemRaw } = await supabase
+  const { data: orderItem } = await supabase
     .from('order_items')
     .select('*, product:products(*), order:orders(status)')
     .eq('download_token', token)
     .single()
 
-  if (!orderItemRaw) {
+  if (!orderItem) {
     return new NextResponse('Download link not found.', { status: 404 })
   }
-
-  const orderItem = orderItemRaw as any
 
   const order = orderItem.order
   if (order?.status !== 'paid') {
