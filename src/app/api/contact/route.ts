@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendEmail } from '@/lib/email/sendgrid'
+import { sendEmail } from '@/lib/email/resend'
 
 export async function POST(req: NextRequest) {
   const { name, email, subject, message } = await req.json()
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Could not send your message. Try again.' }, { status: 500 })
   }
 
-  const adminEmail = process.env.SENDGRID_FROM_EMAIL
+  const adminEmail = process.env.RESEND_FROM_EMAIL
   if (adminEmail) {
     await sendEmail({
       to: adminEmail,
