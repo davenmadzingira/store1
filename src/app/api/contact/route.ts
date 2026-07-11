@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Could not send your message. Try again.' }, { status: 500 })
   }
 
-  const adminEmail = process.env.RESEND_FROM_EMAIL
+  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL
   if (adminEmail) {
     await sendEmail({
       to: adminEmail,
