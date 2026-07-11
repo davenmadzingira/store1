@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Input, Label, Textarea } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import slugify from 'slugify'
-import type { Category, Product } from '@/types/database'
+import type { Category, Product, ProductType } from '@/types/database'
 
 interface ProductFormProps {
   categories: Category[]
@@ -17,7 +17,7 @@ export function ProductForm({ categories, initial }: ProductFormProps) {
   const router = useRouter()
   const isEdit = !!initial
 
-  const [type, setType] = useState<'digital' | 'affiliate'>(initial?.type || 'digital')
+  const [type, setType] = useState<'digital' | 'affiliate'>((initial?.type as ProductType) || 'digital')
   const [title, setTitle] = useState(initial?.title || '')
   const [slug, setSlug] = useState(initial?.slug || '')
   const [shortDescription, setShortDescription] = useState(initial?.short_description || '')
