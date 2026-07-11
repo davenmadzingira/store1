@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendEmail } from '@/lib/email/sendgrid'
+import { sendEmail } from '@/lib/email/resend'
 import { renderReceiptEmail } from '@/lib/email/templates/receipt'
 import { generateDownloadToken } from '@/lib/tokens'
 import type { PricedOrder } from '@/lib/checkout-pricing'
