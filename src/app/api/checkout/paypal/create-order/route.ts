@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
       email,
       user_id: user?.id || null,
       affiliate_ref: refCode,
-    } as any)
+    })
 
     return NextResponse.json({ id: paypalOrder.id })
   } catch (error: any) {
