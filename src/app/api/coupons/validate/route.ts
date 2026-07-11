@@ -9,18 +9,16 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = createAdminClient()
-  const { data: couponRaw } = await supabase
+  const { data: coupon } = await supabase
     .from('coupons')
     .select('*')
     .eq('code', code.trim().toUpperCase())
     .eq('is_active', true)
     .single()
 
-  if (!couponRaw) {
+  if (!coupon) {
     return NextResponse.json({ valid: false, message: 'Coupon not found' })
   }
-
-  const coupon = couponRaw as any
 
   const now = new Date()
   if (new Date(coupon.starts_at) > now) {
