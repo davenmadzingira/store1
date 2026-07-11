@@ -1,28 +1,9 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ProductCard } from '@/components/shop/product-card'
-import { SalesTicker } from '@/components/marketing/sales-ticker'
 import type { Product } from '@/types/database'
 
 export const revalidate = 60
-
-async function getRecentSalesEvents(): Promise<string[]> {
-  const supabase = createClient()
-  const { data } = await supabase
-    .from('orders')
-    .select('id, created_at, order_items(title_snapshot)')
-    .eq('status', 'paid')
-    .order('created_at', { ascending: false })
-    .limit(8)
-
-  if (!data || data.length === 0) return []
-
-  const cities = ['Austin', 'Manchester', 'Toronto', 'Berlin', 'Lagos', 'Sydney', 'Mumbai', 'Lisbon']
-  return data
-    .flatMap((order: any) => order.order_items?.map((i: any) => i.title_snapshot) ?? [])
-    .slice(0, 8)
-    .map((title: string, i: number) => `Someone in ${cities[i % cities.length]} bought ${title}`)
-}
 
 async function getShelf(type: 'digital' | 'affiliate', limit = 4): Promise<Product[]> {
   const supabase = createClient()
@@ -38,10 +19,9 @@ async function getShelf(type: 'digital' | 'affiliate', limit = 4): Promise<Produ
 }
 
 export default async function HomePage() {
-  const [digitalProducts, affiliateProducts, salesEvents] = await Promise.all([
+  const [digitalProducts, affiliateProducts] = await Promise.all([
     getShelf('digital'),
     getShelf('affiliate'),
-    getRecentSalesEvents(),
   ])
 
   return (
@@ -73,8 +53,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      <SalesTicker events={salesEvents.length ? salesEvents : undefined} />
 
       {/* Digital shelf */}
       <section className="mx-auto max-w-6xl px-5 py-14">
