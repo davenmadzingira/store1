@@ -28,28 +28,60 @@ export default async function HomePage() {
     <div>
       {/* Hero */}
       <section className="border-b border-ink-100 bg-paper">
-        <div className="mx-auto max-w-6xl px-5 py-16 sm:py-24">
-          <p className="shelf-label text-signal-dark">Issue 01 · curated this week</p>
-          <h1 className="mt-4 max-w-2xl font-display text-4xl font-medium leading-[1.1] text-ink-900 sm:text-5xl">
-            A small, well-kept shelf of things worth your money.
-          </h1>
-          <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink-500">
-            Digital tools we built ourselves, and the best things we have found
-            everywhere else — kept on the same shelf, priced honestly.
-          </p>
-          <div className="mt-7 flex gap-3">
-            <Link
-              href="/products?type=digital"
-              className="rounded bg-ink-900 px-5 py-2.5 text-sm font-medium text-paper hover:bg-ink-700"
-            >
-              Browse digital products
-            </Link>
-            <Link
-              href="/products?type=affiliate"
-              className="rounded border border-ink-200 px-5 py-2.5 text-sm font-medium text-ink-900 hover:bg-ink-50"
-            >
-              See curated finds
-            </Link>
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-10 px-5 py-16 sm:py-20">
+          <div className="min-w-[280px] flex-1">
+            <div className="mb-6 flex items-center gap-2.5">
+              <svg width="30" height="30" viewBox="0 0 34 34" aria-hidden="true">
+                <rect x="4" y="16" width="26" height="4" rx="1" fill="#14110F" />
+                <rect x="7" y="6" width="6" height="16" rx="1" fill="#B4472F" />
+                <rect x="15" y="4" width="6" height="18" rx="1" fill="#14110F" />
+                <rect x="23" y="8" width="6" height="14" rx="1" fill="#8A6A4A" />
+              </svg>
+              <span className="font-display text-lg font-medium text-ink-900">Shelf</span>
+            </div>
+
+            <p className="shelf-label text-signal-dark">Issue 01 · curated this week</p>
+            <h1 className="mt-4 max-w-2xl font-display text-4xl font-medium leading-[1.1] text-ink-900 sm:text-5xl">
+              A small, well-kept shelf of things worth your money.
+            </h1>
+            <p className="mt-5 max-w-md text-[15px] leading-relaxed text-ink-500">
+              Digital tools we built ourselves, and the best things we have found
+              everywhere else — kept on the same shelf, priced honestly.
+            </p>
+            <div className="mt-7 flex gap-3">
+              <Link
+                href="/products?type=digital"
+                className="rounded bg-ink-900 px-5 py-2.5 text-sm font-medium text-paper hover:bg-ink-700"
+              >
+                Browse digital products
+              </Link>
+              <Link
+                href="/products?type=affiliate"
+                className="rounded border border-ink-200 px-5 py-2.5 text-sm font-medium text-ink-900 hover:bg-ink-50"
+              >
+                See curated finds
+              </Link>
+            </div>
+          </div>
+
+          <div className="relative w-[340px] shrink-0">
+            <svg viewBox="0 0 340 260" width="100%" height="260" aria-hidden="true">
+              <rect x="90" y="30" width="150" height="200" rx="10" fill="#14110F" />
+              <rect x="98" y="46" width="134" height="160" rx="2" fill="#F7F4EC" />
+              <path d="M155 90 L165 72 L175 90" stroke="#8A6A4A" strokeWidth="2" fill="none" />
+              <text x="165" y="122" fontFamily="Georgia, serif" fontSize="14" fill="#14110F" textAnchor="middle" fontWeight="500">TEMPLATE</text>
+              <text x="165" y="140" fontFamily="Georgia, serif" fontSize="9" fill="#6B6B66" textAnchor="middle">Plan. Focus. Achieve.</text>
+              <rect x="10" y="90" width="80" height="140" rx="4" fill="#B4472F" />
+              <text x="50" y="150" fontFamily="Georgia, serif" fontSize="11" fill="#F7F4EC" textAnchor="middle" fontWeight="500">THE</text>
+              <text x="50" y="164" fontFamily="Georgia, serif" fontSize="11" fill="#F7F4EC" textAnchor="middle" fontWeight="500">GUIDE</text>
+              <rect x="250" y="120" width="60" height="120" rx="10" fill="#14110F" />
+              <rect x="255" y="128" width="50" height="100" rx="2" fill="#F7F4EC" />
+              <text x="280" y="175" fontFamily="Georgia, serif" fontSize="8" fill="#14110F" textAnchor="middle" fontWeight="500">DAILY</text>
+              <text x="280" y="186" fontFamily="Georgia, serif" fontSize="8" fill="#14110F" textAnchor="middle" fontWeight="500">NOTES</text>
+            </svg>
+            <div className="absolute -top-1.5 right-0 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-[#8A6A4A] text-center text-[10px] font-medium leading-tight text-paper">
+              Curated picks
+            </div>
           </div>
         </div>
       </section>
