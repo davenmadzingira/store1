@@ -92,6 +92,7 @@ export interface OrderItem {
   download_limit: number
   created_at: string
   product?: Product
+  order?: Pick<Order, 'status'>
 }
 
 export interface AffiliateClick {
@@ -175,6 +176,18 @@ export interface Database {
       blog_posts: { Row: BlogPost; Insert: Partial<BlogPost>; Update: Partial<BlogPost> }
       contact_messages: { Row: ContactMessage; Insert: Partial<ContactMessage>; Update: Partial<ContactMessage> }
       pending_paypal_orders: { Row: PendingPaypalOrder; Insert: Partial<PendingPaypalOrder>; Update: Partial<PendingPaypalOrder> }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
