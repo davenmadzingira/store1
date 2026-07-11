@@ -30,7 +30,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Payment was not completed' }, { status: 400 })
     }
 
-    const pricedOrder = await priceCheckout(pending.lines, pending.coupon_code)
+    const pricedOrder = await priceCheckout(
+      pending.lines as unknown as Parameters<typeof priceCheckout>[0],
+      pending.coupon_code
+    )
 
     const { orderId: fulfilledOrderId } = await fulfillOrder({
       pricedOrder,
