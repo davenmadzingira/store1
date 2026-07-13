@@ -3,16 +3,17 @@ import { cookies } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 
 interface RedirectPageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export default async function AffiliateRedirectPage({ params }: RedirectPageProps) {
+  const { slug } = await params
   const supabase = createAdminClient()
 
   const { data: product } = await supabase
     .from('products')
     .select('*')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .eq('type', 'affiliate')
     .eq('status', 'published')
     .single()
@@ -23,7 +24,7 @@ export default async function AffiliateRedirectPage({ params }: RedirectPageProp
 
   // If this visitor arrived via a site affiliate's link (?ref=CODE earlier in
   // their session), credit the click to that code via a stored cookie.
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const referredByCode = cookieStore.get('ref_code')?.value || null
 
   await supabase.from('affiliate_clicks').insert({

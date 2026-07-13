@@ -7,7 +7,7 @@ import type { BlogPost } from '@/types/database'
 import type { Metadata } from 'next'
 
 interface BlogPostPageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 async function getPost(slug: string): Promise<BlogPost | null> {
@@ -22,7 +22,8 @@ async function getPost(slug: string): Promise<BlogPost | null> {
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
-  const post = await getPost(params.slug)
+  const { slug } = await params
+  const post = await getPost(slug)
   if (!post) return {}
 
   return {
@@ -37,7 +38,8 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const post = await getPost(params.slug)
+  const { slug } = await params
+  const post = await getPost(slug)
   if (!post) notFound()
 
   return (

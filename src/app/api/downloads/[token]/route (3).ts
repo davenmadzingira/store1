@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 interface RouteParams {
-  params: { token: string }
+  params: Promise<{ token: string }>
 }
 
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { token } = params
+  const { token } = await params
   const supabase = createAdminClient()
 
   const { data: orderItem } = await supabase

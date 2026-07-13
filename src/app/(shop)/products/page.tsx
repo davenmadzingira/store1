@@ -10,16 +10,16 @@ export const metadata: Metadata = {
 }
 
 interface ProductsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     type?: string
     category?: string
     q?: string
-  }
+  }>
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+  const { type, category, q } = await searchParams
   const supabase = createClient()
-  const { type, category, q } = searchParams
 
   const { data: categories } = await supabase.from('categories').select('*').order('name')
 

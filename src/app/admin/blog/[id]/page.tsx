@@ -3,12 +3,13 @@ import { notFound } from 'next/navigation'
 import { BlogPostForm } from '@/components/admin/blog-post-form'
 
 interface EditBlogPostPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default async function EditBlogPostPage({ params }: EditBlogPostPageProps) {
+  const { id } = await params
   const supabase = createClient()
-  const { data: post } = await supabase.from('blog_posts').select('*').eq('id', params.id).single()
+  const { data: post } = await supabase.from('blog_posts').select('*').eq('id', id).single()
 
   if (!post) notFound()
 

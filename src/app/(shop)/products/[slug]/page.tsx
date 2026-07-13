@@ -9,7 +9,7 @@ import type { Product } from '@/types/database'
 import type { Metadata } from 'next'
 
 interface ProductPageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 async function getProduct(slug: string): Promise<Product | null> {
@@ -24,7 +24,8 @@ async function getProduct(slug: string): Promise<Product | null> {
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  const product = await getProduct(params.slug)
+  const { slug } = await params
+  const product = await getProduct(slug)
   if (!product) return {}
 
   return {
@@ -39,7 +40,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const product = await getProduct(params.slug)
+  const { slug } = await params
+  const product = await getProduct(slug)
   if (!product) notFound()
 
   // Affiliate products should route through the tracked redirect, never land here directly via a "buy" action.

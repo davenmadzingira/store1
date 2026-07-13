@@ -3,14 +3,15 @@ import { notFound } from 'next/navigation'
 import { ProductForm } from '@/components/admin/product-form'
 
 interface EditProductPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default async function EditProductPage({ params }: EditProductPageProps) {
+  const { id } = await params
   const supabase = createClient()
 
   const [{ data: product }, { data: categories }] = await Promise.all([
-    supabase.from('products').select('*').eq('id', params.id).single(),
+    supabase.from('products').select('*').eq('id', id).single(),
     supabase.from('categories').select('*').order('name'),
   ])
 
