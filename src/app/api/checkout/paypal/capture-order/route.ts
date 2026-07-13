@@ -1,51 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createPaypalOrder } from '@/lib/paypal/server'
+import { capturePaypalOrder } from '@/lib/paypal/server'
 import { priceCheckout } from '@/lib/checkout-pricing'
+import { fulfillOrder } from '@/lib/fulfill-order'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
+import type { PendingPaypalOrderLines } from '@/types/database'
 
 export async function POST(req: NextRequest) {
   try {
-    const { lines, couponCode, email } = await req.json()
+    const { orderId } = await req.json()
 
-    if (!email || !Array.isArray(lines) || lines.length === 0) {
-      return NextResponse.json({ error: 'Missing email or cart items' }, { status: 400 })
+    if (!orderId) {
+      return NextResponse.json({ success: false, error: 'Missing PayPal order ID' }, { status: 400 })
     }
-
-    const pricedOrder = await priceCheckout(lines, couponCode)
-
-    if (pricedOrder.totalCents < 50) {
-      return NextResponse.json(
-        { error: 'Order total must be at least $0.50 to process payment' },
-        { status: 400 }
-      )
-    }
-
-    const paypalOrder = await createPaypalOrder(pricedOrder.totalCents, 'USD')
-
-    // PayPal's createOrder doesn't round-trip custom metadata the way
-    // Stripe sessions do, so we stash what's needed to fulfill the order
-    // in a short-lived table row keyed by the PayPal order ID, and read
-    // it back in the capture route.
-    const supabaseServer = createClient()
-    const { data: { user } } = await supabaseServer.auth.getUser()
-    const refCode = (await cookies()).get('ref_code')?.value || null
 
     const supabase = createAdminClient()
-    await supabase.from('pending_paypal_orders').insert({
-      paypal_order_id: paypalOrder.id,
-      lines,
-      coupon_code: pricedOrder.coupon?.code || null,
-      email,
-      user_id: user?.id || null,
-      affiliate_ref: refCode,
+    const { data: pending } = await supabase
+      .from('pending_paypal_orders')
+      .select('*')
+      .eq('paypal_order_id', orderId)
+      .single()
+
+    if (!pending) {
+      return NextResponse.json({ success: false, error: 'Order not found or already processed' }, { status: 404 })
+    }
+
+    const capture = await capturePaypalOrder(orderId)
+
+    const status = capture?.status
+    if (status !== 'COMPLETED') {
+      return NextResponse.json({ success: false, error: 'Payment was not completed' }, { status: 400 })
+    }
+
+    const pricedOrder = await priceCheckout(
+      pending.lines as unknown as PendingPaypalOrderLines,
+      pending.coupon_code
+    )
+
+    const { orderId: fulfilledOrderId } = await fulfillOrder({
+      pricedOrder,
+      email: pending.email,
+      userId: pending.user_id,
+      paymentProvider: 'paypal',
+      paymentIntentId: orderId,
+      affiliateRef: pending.affiliate_ref,
     })
 
-    return NextResponse.json({ id: paypalOrder.id })
+    await supabase.from('pending_paypal_orders').delete().eq('paypal_order_id', orderId)
+
+    return NextResponse.json({ success: true, orderId: fulfilledOrderId })
   } catch (error: any) {
-    console.error('PayPal order creation error:', error)
-    return NextResponse.json({ error: error.message || 'Could not create PayPal order' }, { status: 500 })
+    console.error('PayPal capture error:', error)
+    return NextResponse.json({ success: false, error: error.message || 'Capture failed' }, { status: 500 })
   }
 }
-

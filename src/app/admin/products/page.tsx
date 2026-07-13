@@ -4,7 +4,7 @@ import Link from 'next/link'
 import type { Product } from '@/types/database'
 
 export default async function AdminProductsPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: products } = await supabase
     .from('products')
     .select('*')

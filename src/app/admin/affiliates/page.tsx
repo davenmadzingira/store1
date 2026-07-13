@@ -5,7 +5,7 @@ import { formatPrice } from '@/lib/utils'
 import type { Product, AffiliateConversion } from '@/types/database'
 
 export default async function AdminAffiliatesPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const [{ data: conversionsRaw }, { count: totalClicks }, { data: affiliateProducts }] = await Promise.all([
     supabase.from('affiliate_conversions').select('*').order('created_at', { ascending: false }),

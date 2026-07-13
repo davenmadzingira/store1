@@ -13,7 +13,7 @@ interface ProductPageProps {
 }
 
 async function getProduct(slug: string): Promise<Product | null> {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data } = await supabase
     .from('products')
     .select('*, category:categories(*)')
@@ -47,7 +47,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   // Affiliate products should route through the tracked redirect, never land here directly via a "buy" action.
   const isAffiliate = product.type === 'affiliate'
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: related } = await supabase
     .from('products')
     .select('*')

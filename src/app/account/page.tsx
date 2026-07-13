@@ -2,7 +2,7 @@ import type { Profile } from '@/types/database'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function AccountOverviewPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data: profileData } = await supabase

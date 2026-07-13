@@ -4,7 +4,7 @@ import { formatPrice, formatDate } from '@/lib/utils'
 import { CopyLinkButton } from '@/components/shop/copy-link-button'
 
 export default async function AffiliateDashboardPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
 const { data: profileData } = await supabase

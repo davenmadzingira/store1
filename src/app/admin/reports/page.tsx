@@ -4,7 +4,7 @@ import { SalesChart } from '@/components/admin/sales-chart'
 import type { Order } from '@/types/database'
 
 export default async function SalesReportsPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
 

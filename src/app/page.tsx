@@ -6,7 +6,7 @@ import type { Product } from '@/types/database'
 export const revalidate = 60
 
 async function getShelf(type: 'digital' | 'affiliate', limit = 4): Promise<Product[]> {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data } = await supabase
     .from('products')
     .select('*')

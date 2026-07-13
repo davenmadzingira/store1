@@ -4,8 +4,8 @@ import type { Database } from '@/types/database'
 
 // Use inside Server Components, Route Handlers, and Server Actions.
 // Respects the signed-in user's session and RLS policies.
-export function createClient() {
-  const cookieStore = cookies()
+export async function createClient() {
+  const cookieStore = await cookies()
 
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

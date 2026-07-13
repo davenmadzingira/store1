@@ -11,7 +11,7 @@ interface BlogPostPageProps {
 }
 
 async function getPost(slug: string): Promise<BlogPost | null> {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data } = await supabase
     .from('blog_posts')
     .select('*')

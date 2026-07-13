@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { CouponsManager } from '@/components/admin/coupons-manager'
 
 export default async function AdminCouponsPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: coupons } = await supabase.from('coupons').select('*').order('created_at', { ascending: false })
 
   return (

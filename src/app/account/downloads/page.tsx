@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { formatFileSize } from '@/lib/utils'
 
 export default async function DownloadsPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data: orders } = await supabase

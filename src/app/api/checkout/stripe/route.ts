@@ -21,9 +21,9 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    const refCode = cookies().get('ref_code')?.value || null
+    const refCode = (await cookies()).get('ref_code')?.value || null
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 

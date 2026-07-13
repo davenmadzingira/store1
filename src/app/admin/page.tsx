@@ -4,7 +4,7 @@ import Link from 'next/link'
 import type { Order } from '@/types/database'
 
 export default async function AdminOverviewPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
 

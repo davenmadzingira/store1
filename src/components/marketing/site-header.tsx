@@ -4,7 +4,7 @@ import { CartLink } from '@/components/shop/cart-link'
 import { SearchBox } from '@/components/shop/search-box'
 
 export async function SiteHeader() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   return (

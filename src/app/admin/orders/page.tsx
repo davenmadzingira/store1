@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { formatPrice, formatDate } from '@/lib/utils'
 
 export default async function AdminOrdersPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: orders } = await supabase
     .from('orders')
     .select('*, order_items(title_snapshot, quantity)')

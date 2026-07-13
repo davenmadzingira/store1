@@ -3,7 +3,7 @@ import { formatPrice, formatDate } from '@/lib/utils'
 import type { Order } from '@/types/database'
 
 export default async function OrderHistoryPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data: orders } = await supabase

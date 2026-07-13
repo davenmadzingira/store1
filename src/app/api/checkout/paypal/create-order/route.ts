@@ -28,9 +28,9 @@ export async function POST(req: NextRequest) {
     // Stripe sessions do, so we stash what's needed to fulfill the order
     // in a short-lived table row keyed by the PayPal order ID, and read
     // it back in the capture route.
-    const supabaseServer = createClient()
+    const supabaseServer = await createClient()
     const { data: { user } } = await supabaseServer.auth.getUser()
-    const refCode = cookies().get('ref_code')?.value || null
+    const refCode = (await cookies()).get('ref_code')?.value || null
 
     const supabase = createAdminClient()
     await supabase.from('pending_paypal_orders').insert({

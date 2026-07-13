@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
 
 export default async function AdminBlogPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: postsRaw } = await supabase.from('blog_posts').select('*').order('created_at', { ascending: false })
   const posts = (postsRaw || []) as BlogPost[]
 
