@@ -35,8 +35,13 @@ export function SiteFooter() {
             </ul>
           </div>
         </div>
-        <div className="mt-10 flex flex-col gap-2 border-t border-ink-700 pt-6 text-xs text-ink-400 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-4 border-t border-ink-700 pt-6 text-xs text-ink-400 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Shelf. All rights reserved.</p>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <Link href="/terms" className="hover:text-paper">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-paper">Privacy Policy</Link>
+            <Link href="/refund-policy" className="hover:text-paper">Refund Policy</Link>
+          </div>
           <p>Payments secured by Stripe and PayPal.</p>
         </div>
       </div>
