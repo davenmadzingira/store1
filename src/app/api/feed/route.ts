@@ -32,24 +32,34 @@ export async function GET() {
     'identifier_exists',
     'brand',
     'product_type',
+    'shipping',
+    'is_bundle',
   ]
 
   const rows = (products || []).map((p) => {
     const priceDollars = (p.price_cents / 100).toFixed(2)
     const currency = (p.currency || 'USD').toUpperCase()
 
+    // Ensure image URL is absolute
+    let imageUrl = p.cover_image_url || ''
+    if (imageUrl && !imageUrl.startsWith('http')) {
+      imageUrl = `${siteUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
+    }
+
     return [
       p.id,
       clean(p.title),
       clean(p.description || p.short_description || ''),
       `${siteUrl}/products/${p.slug}`,
-      p.cover_image_url || '',
+      imageUrl,
       'in_stock',
       `${priceDollars} ${currency}`,
       'new',
       'false',
       'Shelf',
       'Digital Downloads',
+      `GB:::0 ${currency}`,
+      'false',
     ]
   })
 
